@@ -177,21 +177,19 @@ public class GoodsController {
         Date startDate = goods.getStartDate();
         Date endDate = goods.getEndDate();
         Date nowDate = new Date();
-        int seckillStatus = 0; // 默认秒杀还未开始
+//        int seckillStatus = 0; // 默认秒杀还未开始
         int remainSeconds = 0;
         if(nowDate.before(startDate)) {
             // 秒杀还未开始
             remainSeconds = (int)(startDate.getTime() - nowDate.getTime()) / 1000;
         } else if(nowDate.after(endDate)) {
-            seckillStatus = 2; // 秒杀结束
-        } else {
-            seckillStatus = 1; // 正在秒杀
+//            seckillStatus = 2; // 秒杀结束
+            remainSeconds = -1; // 秒杀结束
         }
-
         DetailVo detailVo = new DetailVo();
         detailVo.setUser(user);
         detailVo.setGoodsVo(goods);
-        detailVo.setSecKillStatus(seckillStatus);
+//        detailVo.setSecKillStatus(seckillStatus);
         detailVo.setRemainSeconds(remainSeconds);
 
         return RespBean.success(detailVo);

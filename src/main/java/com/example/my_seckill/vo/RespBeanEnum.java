@@ -24,7 +24,10 @@ public enum RespBeanEnum {
 
     // 秒杀模块
     STOCK_EMPTY(500200, "库存为空"),
-    REPEAT_SECKILL(500201, "同一用户重复抢购");
+    REPEAT_SECKILL(500201, "同一用户重复抢购"),
+
+    REQUEST_ILLEGAL(500301, "请求路径非法"),
+    ERROR_CAPTCHA(500302,"验证码错误" );
 
     private final Integer code;
     private final String message;

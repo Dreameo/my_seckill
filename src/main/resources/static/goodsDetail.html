@@ -50,7 +50,7 @@
                         <img id="captchaImg" width="130" height="32" onclick="refreshCaptcha()" style="display: none">
                         <input id="captcha" class="form-control" style="display: none">
                         <button class="btn btn-primary" type="submit" id="buyButton"
-                                onclick="doSeckill()">立即秒杀
+                                onclick="getSeckillPath()">立即秒杀
                             <input type="hidden" name="goodsId" id="goodsId">
                         </button>
                     </div>
@@ -103,9 +103,9 @@
 
 
 
-    // function refreshCaptcha() {
-    //     $("#captchaImg").attr("src", "/seckill/captcha?goodsId=" + $("#goodsId").val() + "&time=" + new Date());
-    // }
+    function refreshCaptcha() {
+        $("#captchaImg").attr("src", "/seckill/captcha?goodsId=" + $("#goodsId").val() + "&time=" + new Date());
+    }
 
     function getSeckillPath() {
         var goodsId = $("#goodsId").val();
@@ -171,7 +171,7 @@
                     } else if (result == 0) {
                         setTimeout(function () {
                             getResult(goodsId)
-                        });
+                        });  // orderId:成功   秒杀失败：-1 秒杀成功  排队中 ： 0
                     } else {
                         layer.confirm("恭喜您，秒杀成功！查看订单？", {btn: ["确定", "取消"]},
                             function () {
@@ -249,14 +249,14 @@
                 clearTimeout(timeout);
             }
             $("#seckillTip").html("秒杀进行中")
-            // refreshCaptcha();
-            // $("#captchaImg").show();
-            // $("#captcha").show();
-        } else {
+            refreshCaptcha();
+            $("#captchaImg").show();
+            $("#captcha").show();
+        } else{
             $("#buyButton").attr("disabled", true);
             $("#seckillTip").html("秒杀已经结束");
-            // $("#captchaImg").hide();
-            // $("#captcha").hide();
+            $("#captchaImg").hide();
+            $("#captcha").hide();
         }
     };
 

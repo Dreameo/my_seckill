@@ -2,6 +2,7 @@ package com.example.my_seckill.service;
 
 import com.example.my_seckill.entity.Goods;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.my_seckill.entity.User;
 import com.example.my_seckill.vo.GoodsVo;
 
 import java.util.List;
@@ -22,4 +23,10 @@ public interface IGoodsService extends IService<Goods> {
     List<GoodsVo> findGoodsVo();
 
     GoodsVo findGoodsVoById(Long goodsId);
+
+    String createUrl(User user, Long goodsId);
+
+    boolean checkPath(User user, Long goodsId, String path);
+
+    boolean checkCapcha(User user, Long goodsId, String captcha);
 }

@@ -14,20 +14,27 @@ import com.example.my_seckill.utils.JsonUtil;
 import com.example.my_seckill.vo.GoodsVo;
 import com.example.my_seckill.vo.RespBean;
 import com.example.my_seckill.vo.RespBeanEnum;
+import com.mysql.jdbc.log.Log;
+import com.wf.captcha.SpecCaptcha;
+import com.wf.captcha.base.Captcha;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -56,8 +63,94 @@ public class SeckillGoodsController implements InitializingBean {
     @Autowired
     private MQSender mqSender;
 
+    @Autowired
+    private DefaultRedisScript<Long> redisScript;
+
 
     private Map<Long, Boolean> EmptyStockMap = new HashMap<>();
+
+
+    @GetMapping("/captcha")
+    @ResponseBody
+    public void captcha(User user, Long goodsId, HttpServletRequest request, HttpServletResponse response) throws Exception {
+
+        if(user == null || goodsId < 0)
+            throw new GlobalException(RespBeanEnum.REQUEST_ILLEGAL);
+
+        // 设置请求头为输出图片类型
+        response.setContentType("image/gif");
+        response.setHeader("Pragma", "No-cache");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setDateHeader("Expires", 0);
+
+        // 三个参数分别为宽、高、位数
+        SpecCaptcha specCaptcha = new SpecCaptcha(130, 48, 5);
+        // 设置字体
+        specCaptcha.setFont(new Font("Verdana", Font.PLAIN, 32));  // 有默认字体，可以不用设置
+        // 设置类型，纯数字、纯字母、字母数字混合
+        specCaptcha.setCharType(Captcha.TYPE_ONLY_NUMBER);
+
+        // 验证码存入redis
+//        request.getSession().setAttribute("captcha", specCaptcha.text().toLowerCase());
+        redisTemplate.opsForValue().set("captcha:" + user.getId() + ":" + goodsId, specCaptcha.text(), 300, TimeUnit.SECONDS);
+
+        // 输出图片流
+        specCaptcha.out(response.getOutputStream());
+
+    }
+
+    @GetMapping("/path")
+    @ResponseBody
+    public RespBean path(User user, Long goodsId, String captcha) {
+        if(user == null)
+            return RespBean.error(RespBeanEnum.SESSION_ERROR);
+
+        boolean check = goodsService.checkCapcha(user, goodsId, captcha);
+        if(!check)
+            return RespBean.error(RespBeanEnum.ERROR_CAPTCHA);
+
+        String url = goodsService.createUrl(user, goodsId);
+
+        return RespBean.success(url);
+    }
+
+    @PostMapping("/{path}/doSeckill")
+    @ResponseBody
+    public RespBean doPathSeckill(@PathVariable("path") String path, User user, Long goodsId) {
+        if(user == null) return RespBean.error(RespBeanEnum.SESSION_ERROR);
+
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+
+        boolean check = goodsService.checkPath(user, goodsId, path);
+        if(!check) {
+            return RespBean.error(RespBeanEnum.REQUEST_ILLEGAL);
+        }
+        // 判断是否重复抢购
+
+        String seckillOrderJson = (String) valueOperations.get("order:" + user.getId() + ":" + goodsId);
+        if(!StringUtils.isEmpty(seckillOrderJson))
+            return RespBean.error(RespBeanEnum.REPEAT_SECKILL); // 重复抢购
+
+        //内存标记,减少Redis访问
+        if(EmptyStockMap.get(goodsId)) {
+            return RespBean.error(RespBeanEnum.STOCK_EMPTY); // 库存为空， 提前返回
+        }
+
+        // lua 脚本预 减库存
+        Long stock = (Long) redisTemplate.execute(redisScript, Collections.singletonList("seckillGoods:" + goodsId), Collections.EMPTY_LIST);
+        if(stock < 0) {
+            EmptyStockMap.put(goodsId, true); // 标记此时 库存已 空
+            valueOperations.increment("seckillGoods:" + goodsId);
+            return RespBean.error(RespBeanEnum.STOCK_EMPTY); // 返回库存为空
+        }
+
+        // 如果不为空，那么就请求入队， 立即返回排队中
+        SeckillMessage seckillMessage = new SeckillMessage(user, goodsId);
+        mqSender.sendSeckillMessage(JsonUtil.object2JsonStr(seckillMessage));
+        return RespBean.success(0);
+    }
+
+
 
     @RequestMapping("/doSeckill")
     @ResponseBody
@@ -102,8 +195,18 @@ public class SeckillGoodsController implements InitializingBean {
         // 没有重复抢购，那么就往订单中添加数据
         // 没有重复抢购，那么就在redis中 预减库存
 
-        //预减库存
-        Long stock = valueOperations.decrement("seckillGoods:" + goodsId);
+        //redis 预减库存
+//        Long stock = valueOperations.decrement("seckillGoods:" + goodsId);
+//        if(stock < 0) {
+//            EmptyStockMap.put(goodsId, true); // 标记此时 库存已 空
+//            valueOperations.increment("seckillGoods:" + goodsId);
+//            return RespBean.error(RespBeanEnum.STOCK_EMPTY); // 返回库存为空
+//        }
+
+
+
+        // lua 脚本预 减库存
+        Long stock = (Long) redisTemplate.execute(redisScript, Collections.singletonList("seckillGoods:" + goodsId), Collections.EMPTY_LIST);
         if(stock < 0) {
             EmptyStockMap.put(goodsId, true); // 标记此时 库存已 空
             valueOperations.increment("seckillGoods:" + goodsId);
