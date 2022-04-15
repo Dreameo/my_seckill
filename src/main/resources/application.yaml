@@ -2,7 +2,7 @@ spring:
   #RabbitMQ
   rabbitmq:
     #服务器地址
-    host: 121.199.41.235
+    host: 192.168.1.1
     #用户名
     username: guest
     #密码
@@ -38,7 +38,7 @@ spring:
 
 
   datasource:
-#    url: jdbc:mysql://121.199.41.235:3306/seckill
+#    url: jdbc:mysql://192.168.1.1:3306/seckill
 #    username: seckill
 #    password: seckill
     url: jdbc:mysql://localhost:13306/seckill
@@ -48,8 +48,8 @@ spring:
 
 
   redis: # 单机
-    host: 121.199.41.235 # 服务器地址
-    port: 3390 # 端口
+    host: 192.168.1.1 # 服务器地址
+    port: 6379 # 端口
     database: 0 # 数据库
     password: redispwd # redis密码
     lettuce:
