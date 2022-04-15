@@ -1,6 +1,73 @@
 spring:
+  #RabbitMQ
+  rabbitmq:
+    #服务器地址
+    host: 121.199.41.235
+    #用户名
+    username: guest
+    #密码
+    password: guest
+    #虚拟主机
+    virtual-host: /
+    #端口
+    port: 5672
+    listener:
+      simple:
+        #消费者最小数量
+        concurrency: 10
+        #消费者最大数量
+        max-concurrency: 10
+        #限制消费者每次只处理一条消息，处理完再继续下一条消息
+        prefetch: 1
+        #启动时是否默认启动容器，默认true
+        auto-startup: true
+        #被拒绝时重新进入队列
+        default-requeue-rejected: true
+    template:
+      retry:
+        #发布重试，默认false
+        enabled: true
+        #重试时间 默认1000ms
+        initial-interval: 1000
+        #重试最大次数，默认3次
+        max-attempts: 3
+        #重试最大间隔时间，默认10000ms
+        max-interval: 10000
+        #重试间隔的乘数。比如配2.0 第一次等10s，第二次等20s，第三次等40s
+        multiplier: 1.0
+
+
   datasource:
+#    url: jdbc:mysql://121.199.41.235:3306/seckill
+#    username: seckill
+#    password: seckill
     url: jdbc:mysql://localhost:13306/seckill
     username: root
     password: root
     driver-class-name: com.mysql.jdbc.Driver
+
+
+  redis: # 单机
+    host: 121.199.41.235 # 服务器地址
+    port: 3390 # 端口
+    database: 0 # 数据库
+    password: redispwd # redis密码
+    lettuce:
+      pool:
+        max-active: 1024 # 默认8，最大连接数
+        max-wait: 10000ms # 最大连接阻塞等待时间 默认-1
+        max-idle: 200 # 默认空闲等待时间，
+        min-idle: 5 # 最小连接
+
+   # 配置静态资源处理
+  web:
+    resources:
+      add-mappings: true   #启用静态资源处理
+      cache:
+        period: 3600    #客户端缓存时间
+      chain:
+        cache: true #启动资源链缓存，解析器查找资源
+        enabled: true
+        compressed: true  #对静态文件压缩
+        html-application-cache: true
+      static-locations: classpth:/static/

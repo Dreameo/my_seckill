@@ -6,8 +6,15 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * <p>
@@ -19,6 +26,10 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @TableName("t_seckill_goods")
 @ApiModel(value = "SeckillGoods对象", description = "秒杀商品表")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class SeckillGoods implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -37,63 +48,9 @@ public class SeckillGoods implements Serializable {
     private Integer stockCount;
 
     @ApiModelProperty("秒杀开始时间")
-    private LocalDateTime startDate;
+    private Date startDate;
 
     @ApiModelProperty("秒杀结束时间")
-    private LocalDateTime endDate;
+    private Date endDate;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Long getGoodsId() {
-        return goodsId;
-    }
-
-    public void setGoodsId(Long goodsId) {
-        this.goodsId = goodsId;
-    }
-    public BigDecimal getSeckillPrice() {
-        return seckillPrice;
-    }
-
-    public void setSeckillPrice(BigDecimal seckillPrice) {
-        this.seckillPrice = seckillPrice;
-    }
-    public Integer getStockCount() {
-        return stockCount;
-    }
-
-    public void setStockCount(Integer stockCount) {
-        this.stockCount = stockCount;
-    }
-    public LocalDateTime getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDateTime startDate) {
-        this.startDate = startDate;
-    }
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
-    }
-
-    @Override
-    public String toString() {
-        return "SeckillGoods{" +
-            "id=" + id +
-            ", goodsId=" + goodsId +
-            ", seckillPrice=" + seckillPrice +
-            ", stockCount=" + stockCount +
-            ", startDate=" + startDate +
-            ", endDate=" + endDate +
-        "}";
-    }
 }

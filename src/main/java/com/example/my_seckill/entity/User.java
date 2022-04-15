@@ -3,8 +3,14 @@ package com.example.my_seckill.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * <p>
@@ -16,6 +22,10 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @TableName("t_user")
 @ApiModel(value = "User对象", description = "用户表")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -34,82 +44,11 @@ public class User implements Serializable {
     private String head;
 
     @ApiModelProperty("注册时间")
-    private LocalDateTime registerDate;
+    private Date registerDate;
 
     @ApiModelProperty("最后一次登录事件")
-    private LocalDateTime lastLoginDate;
+    private Date lastLoginDate;
 
     @ApiModelProperty("登录次数")
     private Integer loginCount;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt;
-    }
-    public String getHead() {
-        return head;
-    }
-
-    public void setHead(String head) {
-        this.head = head;
-    }
-    public LocalDateTime getRegisterDate() {
-        return registerDate;
-    }
-
-    public void setRegisterDate(LocalDateTime registerDate) {
-        this.registerDate = registerDate;
-    }
-    public LocalDateTime getLastLoginDate() {
-        return lastLoginDate;
-    }
-
-    public void setLastLoginDate(LocalDateTime lastLoginDate) {
-        this.lastLoginDate = lastLoginDate;
-    }
-    public Integer getLoginCount() {
-        return loginCount;
-    }
-
-    public void setLoginCount(Integer loginCount) {
-        this.loginCount = loginCount;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-            "id=" + id +
-            ", nickname=" + nickname +
-            ", password=" + password +
-            ", salt=" + salt +
-            ", head=" + head +
-            ", registerDate=" + registerDate +
-            ", lastLoginDate=" + lastLoginDate +
-            ", loginCount=" + loginCount +
-        "}";
-    }
 }

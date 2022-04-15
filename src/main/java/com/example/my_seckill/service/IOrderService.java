@@ -2,6 +2,9 @@ package com.example.my_seckill.service;
 
 import com.example.my_seckill.entity.Order;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.my_seckill.entity.User;
+import com.example.my_seckill.vo.GoodsVo;
+import com.example.my_seckill.vo.OrderDetailVo;
 
 /**
  * <p>
@@ -13,4 +16,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IOrderService extends IService<Order> {
 
+    Order seckill(User user, GoodsVo goods);
+
+    OrderDetailVo detail(Long orderId);
 }

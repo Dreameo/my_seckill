@@ -2,6 +2,10 @@ package com.example.my_seckill.mapper;
 
 import com.example.my_seckill.entity.Goods;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.my_seckill.vo.GoodsVo;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +17,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface GoodsMapper extends BaseMapper<Goods> {
 
+    List<GoodsVo> findGoodsVo();
+
+    GoodsVo findGoodsVoById(@Param("goodsId") Long goodsId);
 }
